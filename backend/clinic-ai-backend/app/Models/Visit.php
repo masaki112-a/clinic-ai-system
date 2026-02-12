@@ -40,6 +40,11 @@ class Visit extends Model
         return $this->hasOne(ExamSession::class);
     }
 
+    public function stateLogs()
+    {
+        return $this->hasMany(StateLog::class);
+    }
+
     /**
      * 再呼出可能かチェック
      */

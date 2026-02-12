@@ -23,6 +23,9 @@ class VisitResource extends JsonResource
             'ended_at' => $this->ended_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
+            
+            // Include state logs when loaded (for detail view)
+            'state_logs' => StateLogResource::collection($this->whenLoaded('stateLogs')),
         ];
     }
 }

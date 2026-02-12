@@ -61,6 +61,31 @@ class VisitController extends Controller
     }
 
     /**
+     * Get visit detail with state transition history
+     */
+    public function show(int $id): JsonResponse
+    {
+        $visit = Visit::with(['stateLogs' => function ($query) {
+            $query->orderBy('created_at', 'asc');
+        }])->find($id);
+
+        if (!$visit) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'NOT_FOUND',
+                    'message' => '指定された来院情報が見つかりません',
+                ]
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => new VisitResource($visit),
+        ]);
+    }
+
+    /**
      * QR/IC card acceptance
      */
     public function acceptQr(AcceptQrRequest $request): JsonResponse
