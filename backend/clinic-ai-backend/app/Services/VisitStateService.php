@@ -11,7 +11,7 @@ class VisitStateService
 {
     public function transition(Visit $visit, string $toState, ?string $reason = null): void
     {
-        $fromState = $visit->current_state;
+        $fromState = $visit->current_state->value;
 
         // 遷移チェック
         if (! VisitStateTransition::can($fromState, $toState)) {
@@ -32,6 +32,9 @@ class VisitStateService
             );
 
             $visit->update($updateData);
+            
+            // 特殊遷移の追加処理
+            $this->postTransitionUpdate($visit, $fromState, $toState);
 
             StateLog::create([
                 'visit_id'   => $visit->id,
@@ -66,17 +69,24 @@ class VisitStateService
     {
         $fields = [];
 
-        // S3→S5（再呼出）
-        if ($from === VisitState::S3->value && $to === VisitState::S5->value) {
-            $fields['recall_count'] = DB::raw('recall_count + 1');
-        }
-
+        // S3→S5（再呼出）の場合はDB::raw()は使わず、後でインクリメント
         // S2→S7（診察なし会計）
         if ($from === VisitState::S2->value && $to === VisitState::S7->value) {
             $fields['is_no_exam'] = true;
         }
 
         return $fields;
+    }
+    
+    /**
+     * 特殊遷移後の追加処理
+     */
+    private function postTransitionUpdate(Visit $visit, string $from, string $to): void
+    {
+        // S3→S5（再呼出）はインクリメント
+        if ($from === VisitState::S3->value && $to === VisitState::S5->value) {
+            $visit->increment('recall_count');
+        }
     }
 }
 
