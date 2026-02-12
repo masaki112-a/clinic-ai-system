@@ -90,8 +90,8 @@ class VisitStateService
      */
     private function postTransitionUpdate(Visit $visit, string $from, string $to): void
     {
-        // S3→S5（再呼出）はインクリメント
-        if ($from === VisitState::S3->value && $to === VisitState::S5->value) {
+        // S5→S3（再呼出）はインクリメント
+        if ($from === VisitState::S5->value && $to === VisitState::S3->value) {
             $visit->increment('recall_count');
         }
     }

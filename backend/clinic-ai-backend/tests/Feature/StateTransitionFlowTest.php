@@ -77,14 +77,15 @@ class StateTransitionFlowTest extends TestCase
             'recall_count' => 0,
         ]);
 
-        // S3 → S5
+        // S3 → S5 (mark absent - recall_count should NOT increment)
         $this->service->transition($visit, 'S5');
         $this->assertEquals('S5', $visit->fresh()->current_state->value);
-        $this->assertEquals(1, $visit->fresh()->recall_count);
+        $this->assertEquals(0, $visit->fresh()->recall_count);
 
-        // S5 → S3
+        // S5 → S3 (recall - recall_count SHOULD increment)
         $this->service->transition($visit, 'S3');
         $this->assertEquals('S3', $visit->fresh()->current_state->value);
+        $this->assertEquals(1, $visit->fresh()->recall_count);
     }
 
     /** @test */

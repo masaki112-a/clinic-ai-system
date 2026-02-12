@@ -110,7 +110,7 @@ class VisitStateTransitionTest extends TestCase
         $visit->refresh();
 
         $this->assertEquals('S5', $visit->current_state->value);
-        $this->assertEquals(1, $visit->recall_count);
+        $this->assertEquals(0, $visit->recall_count); // Mark absent does NOT increment
     }
 
     /** @test */
@@ -119,7 +119,7 @@ class VisitStateTransitionTest extends TestCase
         $visit = Visit::create([
             'visit_code' => 'TEST007',
             'current_state' => 'S5',
-            'recall_count' => 1,
+            'recall_count' => 0,
         ]);
 
         $service = new VisitStateService();
@@ -128,7 +128,7 @@ class VisitStateTransitionTest extends TestCase
         $visit->refresh();
 
         $this->assertEquals('S3', $visit->current_state->value);
-        $this->assertEquals(1, $visit->recall_count); // 再呼出カウントは戻さない
+        $this->assertEquals(1, $visit->recall_count); // Recall DOES increment
     }
 
     /** @test */
