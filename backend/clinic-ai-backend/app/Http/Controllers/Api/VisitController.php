@@ -7,6 +7,7 @@ use App\Http\Requests\AcceptQrRequest;
 use App\Http\Requests\AcceptManualRequest;
 use App\Http\Requests\CallVisitRequest;
 use App\Http\Requests\EnterVisitRequest;
+use App\Http\Requests\MarkAbsentRequest;
 use App\Http\Requests\VisitListRequest;
 use App\Http\Resources\VisitResource;
 use App\Http\Resources\VisitCollection;
@@ -244,6 +245,56 @@ class VisitController extends Controller
         // Transition to S4 (in examination)
         try {
             $this->visitStateService->transition($visit, VisitState::S4->value);
+            $visit->refresh();
+
+            return response()->json([
+                'success' => true,
+                'data' => new VisitResource($visit),
+            ]);
+        } catch (\App\Exceptions\StateTransitionException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => $e->getMessage(),
+                ]
+            ], 409);
+        }
+    }
+
+    /**
+     * Mark patient as absent (S3 → S5 transition)
+     */
+    public function markAbsent(int $id, MarkAbsentRequest $request): JsonResponse
+    {
+        $visit = Visit::find($id);
+
+        if (!$visit) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'NOT_FOUND',
+                    'message' => '指定された来院情報が見つかりません',
+                ]
+            ], 404);
+        }
+
+        // Check if current state is S3 (calling)
+        if ($visit->current_state !== VisitState::S3) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => "この来院は不在マークできる状態ではありません（現在: {$visit->current_state->value}）",
+                ]
+            ], 409);
+        }
+
+        // Transition to S5 (absent)
+        try {
+            $reason = $request->input('reason');
+            $this->visitStateService->transition($visit, VisitState::S5->value, $reason);
+            
             $visit->refresh();
 
             return response()->json([
