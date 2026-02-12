@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AcceptQrRequest;
 use App\Http\Requests\AcceptManualRequest;
+use App\Http\Requests\CallVisitRequest;
 use App\Http\Requests\VisitListRequest;
 use App\Http\Resources\VisitResource;
 use App\Http\Resources\VisitCollection;
@@ -146,6 +147,54 @@ class VisitController extends Controller
         // Transition to S1 (accepted)
         try {
             $this->visitStateService->transition($visit, VisitState::S1->value);
+            $visit->refresh();
+
+            return response()->json([
+                'success' => true,
+                'data' => new VisitResource($visit),
+            ]);
+        } catch (\App\Exceptions\StateTransitionException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => $e->getMessage(),
+                ]
+            ], 409);
+        }
+    }
+
+    /**
+     * Call patient (S2 → S3 transition)
+     */
+    public function call(int $id, CallVisitRequest $request): JsonResponse
+    {
+        $visit = Visit::find($id);
+
+        if (!$visit) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'NOT_FOUND',
+                    'message' => '指定された来院情報が見つかりません',
+                ]
+            ], 404);
+        }
+
+        // Check if current state is S2 (waiting)
+        if ($visit->current_state !== VisitState::S2) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => "この来院は呼出できる状態ではありません（現在: {$visit->current_state->value}）",
+                ]
+            ], 409);
+        }
+
+        // Transition to S3 (calling)
+        try {
+            $this->visitStateService->transition($visit, VisitState::S3->value);
             $visit->refresh();
 
             return response()->json([

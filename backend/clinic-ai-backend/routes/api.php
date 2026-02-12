@@ -8,4 +8,5 @@ Route::prefix('visits')->group(function () {
     Route::get('/{id}', [VisitController::class, 'show']);
     Route::post('accept/qr', [VisitController::class, 'acceptQr']);
     Route::post('accept/manual', [VisitController::class, 'acceptManual']);
+    Route::post('/{id}/call', [VisitController::class, 'call']);
 });
