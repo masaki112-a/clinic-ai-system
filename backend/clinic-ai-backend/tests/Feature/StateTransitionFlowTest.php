@@ -120,7 +120,7 @@ class StateTransitionFlowTest extends TestCase
     {
         $visit = Visit::factory()->create(['current_state' => 'S2']);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(StateTransitionException::class);
         $this->service->transition($visit, 'S7'); // 理由なし
     }
 }

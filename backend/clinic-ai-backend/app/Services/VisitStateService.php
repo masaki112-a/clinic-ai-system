@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Visit;
 use App\Models\StateLog;
 use App\Enums\VisitState;
+use App\Exceptions\StateTransitionException;
 use Illuminate\Support\Facades\DB;
 
 class VisitStateService
@@ -15,12 +16,18 @@ class VisitStateService
 
         // 遷移チェック
         if (! VisitStateTransition::can($fromState, $toState)) {
-            abort(409, "Invalid visit state transition: {$fromState} → {$toState}");
+            throw new StateTransitionException(
+                "Invalid visit state transition: {$fromState} → {$toState}",
+                409
+            );
         }
 
         // 理由必須チェック
         if (VisitStateTransition::requiresReason($fromState, $toState) && empty($reason)) {
-            abort(400, "Reason is required for this transition: {$fromState} → {$toState}");
+            throw new StateTransitionException(
+                "Reason is required for this transition: {$fromState} → {$toState}",
+                400
+            );
         }
 
         DB::transaction(function () use ($visit, $fromState, $toState, $reason) {

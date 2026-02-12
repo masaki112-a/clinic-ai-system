@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Visit;
 use App\Services\VisitStateService;
+use App\Exceptions\StateTransitionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class VisitStateTransitionTest extends TestCase
@@ -89,7 +90,7 @@ class VisitStateTransitionTest extends TestCase
 
         $service = new VisitStateService();
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(StateTransitionException::class);
 
         $service->transition($visit, 'S7');
     }
