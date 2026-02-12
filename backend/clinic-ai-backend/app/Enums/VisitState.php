@@ -15,9 +15,39 @@ enum VisitState: string
     case S8 = 'S8'; // 会計中
     case S9 = 'S9'; // 完了
 
+    /**
+     * 許可された遷移パターン（憲法第10条準拠）
+     */
+    public function allowedTransitions(): array
+    {
+        return match($this) {
+            self::S0 => [self::S1],
+            self::S1 => [self::S2],
+            self::S2 => [self::S3, self::S7], // 診察なし例外
+            self::S3 => [self::S4, self::S5], // 診察開始 or 再呼出
+            self::S4 => [self::S6],
+            self::S5 => [self::S3], // 再呼出→呼出中に戻る
+            self::S6 => [self::S7],
+            self::S7 => [self::S8],
+            self::S8 => [self::S9],
+            self::S9 => [], // 終端状態
+        };
+    }
+
+    /**
+     * 遷移可能かチェック
+     */
+    public function canTransitionTo(VisitState $to): bool
+    {
+        return in_array($to, $this->allowedTransitions());
+    }
+
+    /**
+     * 表示名取得
+     */
     public function label(): string
     {
-        return match ($this) {
+        return match($this) {
             self::S0 => '未受付',
             self::S1 => '受付済',
             self::S2 => '待機中',
@@ -30,23 +60,4 @@ enum VisitState: string
             self::S9 => '完了',
         };
     }
-
-    public function canTransitionTo(VisitState $to): bool
-    {
-        $allowed = [
-            self::S0->value => [self::S1->value],
-            self::S1->value => [self::S2->value],
-            self::S2->value => [self::S3->value, self::S7->value], // S7 = 診察なし会計
-            self::S3->value => [self::S4->value, self::S5->value], // S5 = 再呼出
-            self::S4->value => [self::S6->value],
-            self::S5->value => [self::S3->value], // 再呼出から呼出中に戻る
-            self::S6->value => [self::S7->value],
-            self::S7->value => [self::S8->value],
-            self::S8->value => [self::S9->value],
-            self::S9->value => [], // 終端状態
-        ];
-
-        return in_array($to->value, $allowed[$this->value] ?? []);
-    }
 }
-

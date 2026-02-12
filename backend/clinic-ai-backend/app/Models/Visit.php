@@ -13,19 +13,26 @@ class Visit extends Model
     protected $fillable = [
         'visit_code',
         'current_state',
-        'is_no_exam',
-        'recall_count',
+        'is_no_exam',        // 追加
+        'recall_count',      // 追加
         'accepted_at',
         'called_at',
         'exam_started_at',
         'exam_ended_at',
         'paid_at',
-        'ended_at',
+        'ended_at',          // 追加
     ];
 
     protected $casts = [
         'current_state' => VisitState::class,
         'is_no_exam' => 'boolean',
+        'recall_count' => 'integer',
+        'accepted_at' => 'datetime',
+        'called_at' => 'datetime',
+        'exam_started_at' => 'datetime',
+        'exam_ended_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'ended_at' => 'datetime',
     ];
 
     public function examSession()
@@ -33,15 +40,21 @@ class Visit extends Model
         return $this->hasOne(ExamSession::class);
     }
 
+    /**
+     * 再呼出可能かチェック
+     */
     public function canRecall(): bool
     {
         return $this->current_state === VisitState::S3
-            && $this->recall_count < config('clinic.max_recall_count', 3);
+            && $this->recall_count < 3; // 最大3回まで
     }
 
+    /**
+     * 診察なし会計かチェック
+     */
     public function isNoExam(): bool
     {
-        return $this->is_no_exam;
+        return $this->is_no_exam === true;
     }
 }
 

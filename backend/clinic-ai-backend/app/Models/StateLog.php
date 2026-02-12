@@ -10,8 +10,16 @@ class StateLog extends Model
         'visit_id',
         'from_state',
         'to_state',
-        'reason',
+        'reason',     // 追加
         'changed_at',
     ];
 
+    protected $casts = [
+        'changed_at' => 'datetime',
+    ];
+
+    public function visit()
+    {
+        return $this->belongsTo(Visit::class);
+    }
 }

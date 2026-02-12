@@ -16,15 +16,15 @@ class VisitStateTransition
                 VisitState::S7->value, // 診察なし例外
             ],
             VisitState::S3->value => [
-                VisitState::S4->value,
-                VisitState::S5->value, // 再呼出
+                VisitState::S4->value,  // 診察開始
+                VisitState::S5->value,  // 再呼出
             ],
             VisitState::S4->value => [VisitState::S6->value],
-            VisitState::S5->value => [VisitState::S3->value], // 再呼出から戻る
+            VisitState::S5->value => [VisitState::S3->value], // 再呼出→呼出中
             VisitState::S6->value => [VisitState::S7->value],
             VisitState::S7->value => [VisitState::S8->value],
             VisitState::S8->value => [VisitState::S9->value],
-            VisitState::S9->value => [], // 終端状態
+            VisitState::S9->value => [], // 終端
         ];
     }
 
@@ -33,10 +33,13 @@ class VisitStateTransition
         return in_array($to, self::allowed()[$from] ?? []);
     }
 
+    /**
+     * 遷移理由の検証（憲法第10条：例外処理）
+     */
     public static function requiresReason(string $from, string $to): bool
     {
-        // S2 → S7 (診察なし会計) は理由必須
-        return $from === 'S2' && $to === 'S7';
+        // S2→S7（診察なし会計）は理由必須
+        return $from === VisitState::S2->value 
+            && $to === VisitState::S7->value;
     }
 }
-

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('visit_id')->constrained();
             $table->string('from_state')->nullable();
             $table->string('to_state');
-            $table->string('reason')->nullable();
+            $table->text('reason')->nullable(); // 追加：遷移理由
             $table->timestamp('changed_at');
             $table->timestamps();
         });
