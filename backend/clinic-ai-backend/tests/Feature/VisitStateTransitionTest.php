@@ -15,7 +15,7 @@ class VisitStateTransitionTest extends TestCase
     public function 正常な状態遷移は成功する()
     {
         $visit = Visit::create([
-            'patient_id' => 'TEST001',
+            'visit_code' => 'TEST001',
             'current_state' => 'S0',
         ]);
 
@@ -32,7 +32,7 @@ class VisitStateTransitionTest extends TestCase
     public function 状態遷移時にログが必ず作成される()
     {
         $visit = Visit::create([
-            'patient_id' => 'TEST002',
+            'visit_code' => 'TEST002',
             'current_state' => 'S1',
         ]);
 
@@ -50,7 +50,7 @@ class VisitStateTransitionTest extends TestCase
     public function 不正な状態遷移は例外になる()
     {
         $visit = Visit::create([
-            'patient_id' => 'TEST003',
+            'visit_code' => 'TEST003',
             'current_state' => 'S0',
         ]);
 
@@ -65,12 +65,12 @@ class VisitStateTransitionTest extends TestCase
     public function 診察なし会計への例外遷移は許可される()
     {
         $visit = Visit::create([
-            'patient_id' => 'TEST004',
+            'visit_code' => 'TEST004',
             'current_state' => 'S2',
         ]);
 
         $service = new VisitStateService();
-        $service->transition($visit, 'S7');
+        $service->transition($visit, 'S7', '処方箋のみ');
 
         $this->assertDatabaseHas('visits', [
             'id' => $visit->id,
