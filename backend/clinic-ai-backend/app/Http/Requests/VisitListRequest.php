@@ -16,10 +16,6 @@ class VisitListRequest extends FormRequest
 
     public function rules(): array
     {
-        $validStates = collect(VisitState::cases())
-            ->map(fn($case) => $case->value)
-            ->implode(',');
-
         return [
             'state' => ['nullable', 'string'],
             'date' => ['nullable', 'date_format:Y-m-d'],
