@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 enum ExamSessionState: string
@@ -14,6 +15,8 @@ enum ExamSessionState: string
 
 class ExamSession extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'visit_id',
         'current_state',
@@ -50,3 +53,4 @@ class ExamSession extends Model
         $this->update(['current_state' => $toState->value]);
     }
 }
+
