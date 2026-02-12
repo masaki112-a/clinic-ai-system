@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AcceptQrRequest;
 use App\Http\Requests\AcceptManualRequest;
+use App\Http\Requests\VisitListRequest;
 use App\Http\Resources\VisitResource;
+use App\Http\Resources\VisitCollection;
 use App\Models\Visit;
 use App\Services\VisitStateService;
 use App\Services\VisitCodeGenerator;
 use App\Enums\VisitState;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class VisitController extends Controller
 {
@@ -18,6 +21,44 @@ class VisitController extends Controller
         private VisitStateService $visitStateService,
         private VisitCodeGenerator $visitCodeGenerator
     ) {}
+
+    /**
+     * Get visit list with filtering, pagination, and sorting
+     */
+    public function index(VisitListRequest $request): VisitCollection
+    {
+        $query = Visit::query();
+
+        // Filter by state(s)
+        if ($request->has('state')) {
+            $states = array_map('trim', explode(',', $request->input('state')));
+            $query->whereIn('current_state', $states);
+        }
+
+        // Filter by specific date
+        if ($request->has('date')) {
+            $query->whereDate('created_at', $request->input('date'));
+        }
+
+        // Filter by date range
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        // Sorting
+        $sortField = $request->input('sort', 'created_at');
+        $sortOrder = $request->input('order', 'desc');
+        $query->orderBy($sortField, $sortOrder);
+
+        // Pagination
+        $perPage = $request->input('per_page', 20);
+        $visits = $query->paginate($perPage);
+
+        return new VisitCollection($visits);
+    }
 
     /**
      * QR/IC card acceptance
