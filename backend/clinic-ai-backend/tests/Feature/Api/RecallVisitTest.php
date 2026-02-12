@@ -195,4 +195,27 @@ class RecallVisitTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    /** @test */
+    public function 無効なnoteでエラーになる()
+    {
+        $visit = Visit::factory()->create([
+            'current_state' => VisitState::S5->value,
+        ]);
+
+        // 501 characters (exceeds max 500)
+        $longNote = str_repeat('あ', 501);
+
+        $response = $this->postJson("/api/visits/{$visit->id}/recall", [
+            'note' => $longNote,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'error' => [
+                    'code' => 'VALIDATION_ERROR',
+                ]
+            ]);
+    }
 }
