@@ -13,4 +13,5 @@ Route::prefix('visits')->group(function () {
     Route::post('/{id}/enter', [VisitController::class, 'enter']);
     Route::post('/{id}/mark-absent', [VisitController::class, 'markAbsent']);
     Route::post('/{id}/recall', [VisitController::class, 'recall']);
+    Route::post('/{id}/complete-exam', [VisitController::class, 'completeExam']);
 });
