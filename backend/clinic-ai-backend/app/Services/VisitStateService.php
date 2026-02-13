@@ -64,6 +64,8 @@ class VisitStateService
             VisitState::S3->value => ['called_at' => now()],
             VisitState::S4->value => ['exam_started_at' => now()],
             VisitState::S6->value => ['exam_ended_at' => now()],
+            VisitState::S6_5->value => ['payment_ready_at' => now()],
+            VisitState::S7->value => ['payment_called_at' => now()],
             VisitState::S8->value => ['paid_at' => now()],
             VisitState::S9->value => ['ended_at' => now()],
             default               => [],
@@ -78,8 +80,8 @@ class VisitStateService
         $fields = [];
 
         // S3→S5（再呼出）の場合はDB::raw()は使わず、後でインクリメント
-        // S2→S7（診察なし会計）
-        if ($from === VisitState::S2->value && $to === VisitState::S7->value) {
+        // S2→S6（診察なし会計）
+        if ($from === VisitState::S2->value && $to === VisitState::S6->value) {
             $fields['is_no_exam'] = true;
         }
 

@@ -71,11 +71,11 @@ class VisitStateTransitionTest extends TestCase
         ]);
 
         $service = new VisitStateService();
-        $service->transition($visit, 'S7', '処方箋のみ');
+        $service->transition($visit, 'S6', '処方箋のみ');
 
         $this->assertDatabaseHas('visits', [
             'id' => $visit->id,
-            'current_state' => 'S7',
+            'current_state' => 'S6',
             'is_no_exam' => true,
         ]);
     }
@@ -92,7 +92,7 @@ class VisitStateTransitionTest extends TestCase
 
         $this->expectException(StateTransitionException::class);
 
-        $service->transition($visit, 'S7');
+        $service->transition($visit, 'S6');
     }
 
     /** @test */

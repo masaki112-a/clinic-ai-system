@@ -56,8 +56,8 @@ class VisitStateTransitionTest extends TestCase
     /** @test */
     public function 診察なし会計は理由が必須()
     {
-        // S2 → S7 は理由必須
-        $this->assertTrue(VisitStateTransition::requiresReason('S2', 'S7'));
+        // S2 → S6 は理由必須
+        $this->assertTrue(VisitStateTransition::requiresReason('S2', 'S6'));
 
         // 他の遷移は理由不要
         $this->assertFalse(VisitStateTransition::requiresReason('S0', 'S1'));
