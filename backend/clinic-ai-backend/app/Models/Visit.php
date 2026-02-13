@@ -16,6 +16,7 @@ class Visit extends Model
         'is_no_exam',        // 追加
         'recall_count',      // 追加
         'accepted_at',
+        'waiting_started_at',
         'called_at',
         'exam_started_at',
         'exam_ended_at',
@@ -28,6 +29,7 @@ class Visit extends Model
         'is_no_exam' => 'boolean',
         'recall_count' => 'integer',
         'accepted_at' => 'datetime',
+        'waiting_started_at' => 'datetime',
         'called_at' => 'datetime',
         'exam_started_at' => 'datetime',
         'exam_ended_at' => 'datetime',

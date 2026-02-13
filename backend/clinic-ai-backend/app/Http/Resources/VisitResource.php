@@ -16,6 +16,7 @@ class VisitResource extends JsonResource
             'is_no_exam' => $this->is_no_exam,
             'recall_count' => $this->recall_count,
             'accepted_at' => $this->accepted_at?->toIso8601String(),
+            'waiting_started_at' => $this->waiting_started_at?->toIso8601String(),
             'called_at' => $this->called_at?->toIso8601String(),
             'exam_started_at' => $this->exam_started_at?->toIso8601String(),
             'exam_ended_at' => $this->exam_ended_at?->toIso8601String(),

@@ -9,6 +9,7 @@ use App\Http\Requests\CallVisitRequest;
 use App\Http\Requests\EnterVisitRequest;
 use App\Http\Requests\MarkAbsentRequest;
 use App\Http\Requests\RecallVisitRequest;
+use App\Http\Requests\StartWaitingRequest;
 use App\Http\Requests\VisitListRequest;
 use App\Http\Resources\VisitResource;
 use App\Http\Resources\VisitCollection;
@@ -150,6 +151,54 @@ class VisitController extends Controller
         // Transition to S1 (accepted)
         try {
             $this->visitStateService->transition($visit, VisitState::S1->value);
+            $visit->refresh();
+
+            return response()->json([
+                'success' => true,
+                'data' => new VisitResource($visit),
+            ]);
+        } catch (\App\Exceptions\StateTransitionException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => $e->getMessage(),
+                ]
+            ], 409);
+        }
+    }
+
+    /**
+     * Start waiting in waiting room (S1 → S2 transition)
+     */
+    public function startWaiting(int $id, StartWaitingRequest $request): JsonResponse
+    {
+        $visit = Visit::find($id);
+
+        if (!$visit) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'NOT_FOUND',
+                    'message' => '指定された来院情報が見つかりません',
+                ]
+            ], 404);
+        }
+
+        // Check if current state is S1 (accepted)
+        if ($visit->current_state !== VisitState::S1) {
+            return response()->json([
+                'success' => false,
+                'error' => [
+                    'code' => 'INVALID_STATE_TRANSITION',
+                    'message' => "この来院は待機開始できる状態ではありません（現在: {$visit->current_state->value}）",
+                ]
+            ], 409);
+        }
+
+        // Transition to S2 (waiting)
+        try {
+            $this->visitStateService->transition($visit, VisitState::S2->value);
             $visit->refresh();
 
             return response()->json([
