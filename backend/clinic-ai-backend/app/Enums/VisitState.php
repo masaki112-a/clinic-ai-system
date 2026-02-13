@@ -10,9 +10,10 @@ enum VisitState: string
     case S3 = 'S3'; // 呼出中
     case S4 = 'S4'; // 診察中
     case S5 = 'S5'; // 再呼出
-    case S6 = 'S6'; // 診察終了
-    case S7 = 'S7'; // 会計待
-    case S8 = 'S8'; // 会計中
+    case S6 = 'S6'; // 会計準備中
+    case S6_5 = 'S6.5'; // 会計呼出可
+    case S7 = 'S7'; // 会計中
+    case S8 = 'S8'; // 会計済
     case S9 = 'S9'; // 完了
 
     /**
@@ -23,11 +24,12 @@ enum VisitState: string
         return match($this) {
             self::S0 => [self::S1],
             self::S1 => [self::S2],
-            self::S2 => [self::S3, self::S7], // 診察なし例外
+            self::S2 => [self::S3, self::S6], // 診察なし例外（S6: 会計準備中へ）
             self::S3 => [self::S4, self::S5], // 診察開始 or 再呼出
             self::S4 => [self::S6],
             self::S5 => [self::S3], // 再呼出→呼出中に戻る
-            self::S6 => [self::S7],
+            self::S6 => [self::S6_5], // 会計準備中 → 会計呼出可
+            self::S6_5 => [self::S7], // 会計呼出可 → 会計中
             self::S7 => [self::S8],
             self::S8 => [self::S9],
             self::S9 => [], // 終端状態
@@ -54,9 +56,10 @@ enum VisitState: string
             self::S3 => '呼出中',
             self::S4 => '診察中',
             self::S5 => '再呼出',
-            self::S6 => '診察終了',
-            self::S7 => '会計待',
-            self::S8 => '会計中',
+            self::S6 => '会計準備中',
+            self::S6_5 => '会計呼出可',
+            self::S7 => '会計中',
+            self::S8 => '会計済',
             self::S9 => '完了',
         };
     }

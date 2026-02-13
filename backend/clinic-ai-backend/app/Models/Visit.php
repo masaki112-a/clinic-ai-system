@@ -20,6 +20,10 @@ class Visit extends Model
         'called_at',
         'exam_started_at',
         'exam_ended_at',
+        'payment_amount',
+        'insurance_type',
+        'payment_ready_at',
+        'payment_called_at',
         'paid_at',
         'ended_at',          // 追加
     ];
@@ -33,6 +37,8 @@ class Visit extends Model
         'called_at' => 'datetime',
         'exam_started_at' => 'datetime',
         'exam_ended_at' => 'datetime',
+        'payment_ready_at' => 'datetime',
+        'payment_called_at' => 'datetime',
         'paid_at' => 'datetime',
         'ended_at' => 'datetime',
     ];

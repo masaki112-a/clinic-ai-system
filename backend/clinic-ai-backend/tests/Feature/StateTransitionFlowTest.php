@@ -51,7 +51,11 @@ class StateTransitionFlowTest extends TestCase
         $this->assertEquals('S6', $visit->fresh()->current_state->value);
         $this->assertNotNull($visit->fresh()->exam_ended_at);
 
-        // S6 → S7
+        // S6 → S6.5
+        $this->service->transition($visit, 'S6.5');
+        $this->assertEquals('S6.5', $visit->fresh()->current_state->value);
+
+        // S6.5 → S7
         $this->service->transition($visit, 'S7');
         $this->assertEquals('S7', $visit->fresh()->current_state->value);
 
@@ -66,7 +70,7 @@ class StateTransitionFlowTest extends TestCase
         $this->assertNotNull($visit->fresh()->ended_at);
 
         // StateLogが記録されている
-        $this->assertCount(8, StateLog::where('visit_id', $visit->id)->get());
+        $this->assertCount(9, StateLog::where('visit_id', $visit->id)->get());
     }
 
     /** @test */
@@ -93,16 +97,16 @@ class StateTransitionFlowTest extends TestCase
     {
         $visit = Visit::factory()->create(['current_state' => 'S2']);
 
-        // S2 → S7（理由付き）
-        $this->service->transition($visit, 'S7', '処方箋のみ');
+        // S2 → S6（理由付き）
+        $this->service->transition($visit, 'S6', '処方箋のみ');
 
         $visit = $visit->fresh();
-        $this->assertEquals('S7', $visit->current_state->value);
+        $this->assertEquals('S6', $visit->current_state->value);
         $this->assertTrue($visit->is_no_exam);
 
         // StateLogに理由が記録されている
         $log = StateLog::where('visit_id', $visit->id)
-            ->where('to_state', 'S7')
+            ->where('to_state', 'S6')
             ->first();
         $this->assertEquals('処方箋のみ', $log->reason);
     }
@@ -122,6 +126,6 @@ class StateTransitionFlowTest extends TestCase
         $visit = Visit::factory()->create(['current_state' => 'S2']);
 
         $this->expectException(StateTransitionException::class);
-        $this->service->transition($visit, 'S7'); // 理由なし
+        $this->service->transition($visit, 'S6'); // 理由なし
     }
 }
