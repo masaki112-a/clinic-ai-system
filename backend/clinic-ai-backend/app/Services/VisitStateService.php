@@ -60,6 +60,7 @@ class VisitStateService
     {
         return match ($state) {
             VisitState::S1->value => ['accepted_at' => now()],
+            VisitState::S2->value => ['waiting_started_at' => now()],
             VisitState::S3->value => ['called_at' => now()],
             VisitState::S4->value => ['exam_started_at' => now()],
             VisitState::S6->value => ['exam_ended_at' => now()],

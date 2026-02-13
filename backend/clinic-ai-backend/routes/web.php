@@ -1,4 +1,3 @@
-cat > routes/web.php << 'EOF'
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -20,4 +19,3 @@ Route::get('/', function () {
         'documentation' => '/api/documentation',
     ]);
 });
-EOF
